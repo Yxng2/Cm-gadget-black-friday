@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CM GADGET Black Friday Mega Sale</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Black/Gold theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000; /* Deep Black */
+            color: #FFFFFF;
+        }
+        .gold-text {
+            color: #FFD700; /* Pure Gold */
+        }
+        .gold-border {
+            border-color: #FFD700;
+        }
+        .golden-gradient {
+            background-image: linear-gradient(to right, #FFD700, #FFA500);
+        }
+        .buy-button {
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(255, 215, 0, 0.5), 0 2px 4px -1px rgba(255, 215, 0, 0.3);
+        }
+        .buy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(255, 215, 0, 0.5), 0 4px 6px -2px rgba(255, 215, 0, 0.3);
+        }
+        .category-tab.active {
+            background-color: #FFD700;
+            color: #000000;
+            font-weight: 700;
+        }
+        .product-image {
+            width: 100%;
+            height: 180px; /* Consistent height for product images */
+            object-fit: contain; /* Ensure the gadget is fully visible */
+            background-color: #1a1a1a;
+            border-radius: 0.5rem;
+        }
+        .loader {
+            border-top: 4px solid #FFD700;
+            border-right: 4px solid transparent;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<id="body class="min-h-screen">
+
+    <!-- Header & Banner -->
+    <header class="golden-gradient text-black py-8 px-4 shadow-xl">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-xs sm:text-sm font-semibold uppercase tracking-widest">CM GADGET Presents</p>
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-extrabold mt-1 mb-2 leading-none">
+                BLACK FRIDAY
+            </h1>
+            <h2 class="text-xl sm:text-3xl font-light italic">
+                The Ultimate Tech Upgrade Starts "Now!
+            </h2>
+            <p class="text-sm font-bold mt-3 bg-black text-white px-4 py-1 rounded-full inline-block">
+                DEALS VALID ON 12/12 ONLY!
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 sm:p-6">
+
+        <!-- Category Tabs -->
+        <div id="category-tabs" class="flex flex-wrap gap-2 justify-center py-6 sticky top-0 bg-black z-10 border-b border-gray-800">
+            <button class="category-tab active text-sm sm:text-base px-4 py-2 rounded-full transition duration-300" data-category="all">ALL DEALS</button>
+            <button class="category-tab text-sm sm:text-base px-4 py-2 rounded-full gold-border border text-gold-text transition duration-300 hover:bg-amber-800 hover:text-black hover:border-amber-800" data-category="phone">iPhones</button>
+            <button class="category-tab text-sm sm:text-base px-4 py-2 rounded-full gold-border border text-gold-text transition duration-300 hover:bg-amber-800 hover:text-black hover:border-amber-800" data-category="flagship">2025 Flagships</button>
+            <button class="category-tab text-sm sm:text-base px-4 py-2 rounded-full gold-border border text-gold-text transition duration-300 hover:bg-amber-800 hover:text-black hover:border-amber-800" data-category="computer">Laptops & Tabs</button>
+            <button class="category-tab text-sm sm:text-base px-4 py-2 rounded-full gold-border border text-gold-text transition duration-300 hover:bg-amber-800 hover:text-black hover:border-amber-800" data-category="accessory">Others</button>
+        </div>
+
+        <!-- Product Grid -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+            <!-- Products will be injected here by JavaScript -->
+        </div>
+
+    </main>
+
+    <!-- Footer & Contact -->
+    <footer class="text-center py-6 mt-12 border-t border-gray-800">
+        <p class="text-sm text-gray-500">&copy; 2025 CM GADGET. All Rights Reserved.</p>
+        <p class="text-sm gold-text mt-2">
+            Contact us on WhatsApp: <a href="https://wa.me/2349015992777" class="hover:underline font-semibold">+234 901 599 2777</a>
+        </p>
+    </footer>
+
+    <script>
+        // --- API & Utility Functions ---
+
+        const exponentialBackoffFetch = async (url, options, maxRetries = 5) => {
+            const apiKey = ""; // API key is provided by the environment
+            const urlWithKey = `${url}?key=${apiKey}`;
+
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(urlWithKey, options);
+                    
+                    if (response.ok) {
+                        return response;
+                    }
+                    
+                    // If not OK, but not a 429, throw to handle as a normal error
+                    if (response.status !== 429) {
+                        throw new Error(`API returned status ${response.status}: ${await response.text()}`);
+                    }
+
+                    // Handle rate limiting (429) with exponential backoff
+                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                    if (attempt < maxRetries - 1) {
+                        // console.log(`Rate limit hit, retrying in ${delay / 1000}s...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    } else {
+                        throw new Error("Max retries exceeded due to rate limiting.");
+                    }
+
+                } catch (error) {
+                    // console.error("Fetch error:", error);
+                    if (attempt === maxRetries - 1) {
+                        throw error;
+                    }
+                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        };
+
+        async function generateAndLoadImage(productName, targetElement) {
+            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict';
+            
+            // Construct a prompt optimized for the black and gold theme
+            const prompt = `A single, high-detail, minimalist view of a "${productName}" gadget. The device is centered on a deep black background with luxurious golden lighting accents. Studio quality, photorealistic, 8k.`;
+
+            const payload = {
+                instances: { prompt: prompt },
+                parameters: { "sampleCount": 1 }
+            };
+
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+
+            // Set up loading state
+            targetElement.innerHTML = `
+                <div class="h-full w-full flex items-center justify-center">
+                    <div class="loader"></div>
+                </div>
+            `;
+
+            try {
+                const response = await exponentialBackoffFetch(apiUrl, options);
+                const result = await response.json();
+
+                const base64Data = result.predictions?.[0]?.bytesBase64Encoded;
+
+                if (base64Data) {
+                    const imageUrl = `data:image/png;base64,${base64Data}`;
+                    targetElement.innerHTML = `<img src="${imageUrl}" alt="${productName}" class="product-image transition duration-500 ease-in-out transform hover:scale-105" />`;
+                } else {
+                    targetElement.innerHTML = `
+                        <div class="h-full w-full flex items-center justify-center text-center text-red-500 text-sm p-4">
+                            Image generation failed for ${productName}.
+                        </div>
+                    `;
+                    // console.error("API response missing image data:", result);
+                }
+
+            } catch (error) {
+                targetElement.innerHTML = `
+                    <div class="h-full w-full flex items-center justify-center text-center text-red-500 text-sm p-4">
+                        Error fetching image for ${productName}.
+                    </div>
+                `;
+                // console.error("Error during image API call:", error);
+            }
+        }
+
+
+        // --- Application Logic ---
+
+        const products = [
+            // iPhones
+            { id: 1, name: "iPhone 15 Pro Max", specs: "256GB | BH: 100% | IDM", price: "₦780,000", category: "phone" },
+            { id: 2, name: "iPhone 13 Pro Max", specs: "128GB | Face ID ✅ | BH: 79%", price: "₦480,000", category: "phone" },
+            { id: 3, name: "iPhone 12 Pro Max Open Box", specs: "128GB | BH: 77% | No parts replaced", price: "₦405,000", category: "phone" },
+            { id: 4, name: "iPhone 12", specs: "128GB | BH: 92%", price: "₦350,000", category: "phone" },
+            { id: 5, name: "iPhone XS Max", specs: "64GB | BH: 100% | Clean, IBM & IDM", price: "₦215,000", category: "phone" },
+            { id: 6, name: "iPhone 11 Pro No Face ID (73%)", specs: "64GB | BH: 73% | No Face ID ❌", price: "₦230,000", category: "phone" },
+            { id: 7, name: "iPhone 11 Pro No Face ID (88%)", specs: "64GB | BH: 88% | No Face ID ❌", price: "₦210,000", category: "phone" },
+            { id: 8, name: "iPhone XR", specs: "64GB | BH: 90% | Face ID and TT active", price: "₦200,000", category: "phone" },
+            { id: 9, name: "iPhone 7 Plus", specs: "128GB | BH: 98% | Neatness 6/10 | No Fingerprint", price: "₦87,000", category: "phone" },
+
+            // Next-Gen / Flagship
+            { id: 10, name: "Samsung S25 Ultra 1TB Jet Black", specs: "1TB | Physical & eSIM | Brand New", price: "₦1,650,000", category: "flagship" },
+            { id: 11, name: "iPhone 17 Pro Max 256GB LOCKED eSIM", specs: "256GB | Brand new non active | Just 1 ❗️", price: "₦1,360,000", category: "flagship" },
+            { id: 12, name: "iPhone 17 US Unlocked", specs: "256GB | eSIM", price: "₦1,400,000", category: "flagship" },
+            { id: 13, name: "UK IPhone 16 Pro", specs: "128GB | BH99% | Physical Sim | Apple Warranty 2026", price: "₦1,310,000", category: "flagship" },
+            { id: 14, name: "US Inbuilt chip Unlocked iPhone 16", specs: "UK 128GB | Inbuilt chip", price: "₦890,000", category: "flagship" },
+            { id: 15, name: "US Inbuilt chip Unlocked iPhone 16 Plus", specs: "UK 128GB | Inbuilt chip", price: "₦930,000", category: "flagship" },
+
+            // Laptops/Tablets
+            { id: 16, name: "HP 1040 G8 i7 x360", specs: "16GB / 512GB SSD | 11th Gen | convertible", price: "₦820,000", category: "computer" },
+            { id: 17, name: "iPad Pro 11-inch 3rd Gen M1", specs: "128GB | 9/10 neatness | WiFi only", price: "₦845,000", category: "computer" },
+            { id: 18, name: "HP Elitebook 840 G3 i7 6th gen", specs: "i7 6th gen | 8GB RAM / 256GB SSD | Touchscreen", price: "₦340,000", category: "computer" },
+            { id: 19, name: "HP Revolve Core i5 Touchscreen", specs: "8GB RAM / 256GB SSD | Touchscreen | Keyboard Light", price: "₦295,000", category: "computer" },
+            { id: 20, name: "MacBook Pro 2013 Core i5", specs: "8GB RAM / 256GB | Keyboard light", price: "₦270,000", category: "computer" },
+            { id: 21, name: "HP 820 G4 i7 6th gen", specs: "6th gen | 8GB / 256GB | Non touch", price: "₦260,000", category: "computer" },
+            { id: 22, name: "MacBook Pro 2012 Flash Sell (320GB)", specs: "Core i5 | 8GB RAM / 320GB HDD | 24hrs time frame", price: "₦170,000", category: "computer" },
+            { id: 23, name: "MacBook Pro 2012 13-inch Flash Sell", specs: "Core i5 | 8GB RAM / 320GB HDD | 24hrs sale", price: "₦150,000", category: "computer" },
+
+            // Accessories/Android
+            { id: 24, name: "iWATCH SERIES 8 GPS 45MM", specs: "45MM | BH95% | GPS Only | Black", price: "₦285,000", category: "accessory" },
+            { id: 25, name: "Redmi 13C", specs: "8GB / 256GB | Neatness: 8/10", price: "₦88,000", category: "accessory" },
+            { id: 26, name: "Redmi 10C", specs: "4GB / 128GB", price: "₦86,000", category: "accessory" },
+        ];
+
+        const productGrid = document.getElementById('product-grid');
+        const tabs = document.querySelectorAll('.category-tab');
+        const whatsappNumber = '2348117477650';
+
+        // Function to generate the WhatsApp link
+        function getWhatsAppLink(productName, price) {
+            const message = encodeURIComponent(`Hello CM GADGET, I saw your Black Friday ad and I am interested in purchasing the ${productName} for ${price}. Is it still available?`);
+            return `https://wa.me/${whatsappNumber}?text=${message}`;
+        }
+
+        // Function to create an HTML card for a product
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'bg-gray-900 rounded-xl overflow-hidden shadow-2xl p-4 transition-transform hover:scale-[1.02] border-2 border-gray-800 hover:border-amber-400';
+
+            // Unique ID for the image container
+            const imageContainerId = `img-container-${product.id}`;
+            
+            // Card Content with an empty container for the generated image
+            card.innerHTML = `
+                <div id="${imageContainerId}" class="product-image w-full mb-4 flex items-center justify-center">
+                    <!-- Image will be loaded here -->
+                </div>
+                <div class="p-2">
+                    <h3 class="text-lg font-bold gold-text">${product.name}</h3>
+                    <p class="text-sm text-gray-400 mt-1 mb-3">${product.specs}</p>
+                    <div class="flex items-center justify-between mt-4">
+                        <p class="text-2xl font-extrabold text-white">${product.price}</p>
+                        <a href="${getWhatsAppLink(product.name, product.price)}" target="_blank" class="buy-button bg-amber-500 text-black font-bold py-2 px-4 rounded-full uppercase text-sm hover:bg-amber-400">
+                            Buy Now
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            // Asynchronously generate and load the image
+            const imageContainer = card.querySelector(`#${imageContainerId}`);
+            if (imageContainer) {
+                // We use a simplified name for the prompt to improve results
+                let simpleName = product.name.replace(/\s*\(.*\)\s*|\s*\|.*$/g, '');
+                generateAndLoadImage(simpleName, imageContainer);
+            }
+
+            return card;
+        }
+
+        // Function to render products based on selected category
+        function renderProducts(category) {
+            productGrid.innerHTML = '';
+            const filteredProducts = category === 'all' 
+                ? products 
+                : products.filter(p => p.category === category);
+
+            if (filteredProducts.length === 0) {
+                productGrid.innerHTML = '<p class="text-center text-gray-500 col-span-full py-10">No deals found in this category.</p>';
+                return;
+            }
+
+            filteredProducts.forEach(product => {
+                productGrid.appendChild(createProductCard(product));
+            });
+        }
+
+        // Event listener for category tabs
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => {
+                    t.classList.remove('active', 'bg-amber-500', 'text-black', 'border-transparent');
+                    t.classList.add('gold-border', 'border', 'text-gold-text', 'hover:bg-amber-800', 'hover:text-black', 'hover:border-amber-800');
+                });
+
+                // Add active class to clicked tab
+                this.classList.add('active', 'bg-amber-500', 'text-black', 'border-transparent');
+                this.classList.remove('gold-border', 'border', 'text-gold-text', 'hover:bg-amber-800', 'hover:text-black', 'hover:border-amber-800');
+                
+                // Render products for the selected category
+                const category = this.getAttribute('data-category');
+                renderProducts(category);
+            });
+        });
+
+        // Initial render (show all products)
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts('all');
+        });
+    </script>
+
+</body>
+</html>
+
